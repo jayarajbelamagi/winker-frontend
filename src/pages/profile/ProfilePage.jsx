@@ -14,7 +14,7 @@ import { MdEdit } from "react-icons/md";
 import { formatMemberSinceDate } from "../../utils/date";
 import useFollow from "../../hooks/useFollow";
 import useUpdateUserProfile from "../../hooks/useUpdateUserProfile";
-import { apiFetch } from "../../utils/apiFetch"; // ✅ Added apiFetch
+import { apiFetch } from "../../services/apiClient"; // ✅ Added apiFetch
 
 const ProfilePage = () => {
   const [coverImg, setCoverImg] = useState(null);
