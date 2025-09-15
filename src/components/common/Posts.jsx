@@ -2,6 +2,7 @@ import Post from "./Post";
 import PostSkeleton from "../skeletons/PostSkeleton";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
+import { apiFetch } from "../services/apiClient";
 
 const Posts = ({ feedType, username, userId }) => {
 	const [searchTerm, setSearchTerm] = useState("");
@@ -31,7 +32,7 @@ const Posts = ({ feedType, username, userId }) => {
 	} = useQuery({
 		queryKey: ["posts", feedType],
 		queryFn: async () => {
-			const res = await fetch(POST_ENDPOINT);
+			const res = await apiFetch(POST_ENDPOINT);
 			const data = await res.json();
 			if (!res.ok) throw new Error(data.error || "Something went wrong");
 			return data;
