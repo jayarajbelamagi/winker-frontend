@@ -4,6 +4,7 @@ import { useRef, useState } from "react";
 import { IoCloseSharp } from "react-icons/io5";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-hot-toast";
+import { apiFetch } from "../../utils/apiFetch";
 
 const CreatePost = () => {
   const [text, setText] = useState("");
@@ -19,13 +20,12 @@ const CreatePost = () => {
       formData.append("text", text);
       if (img) formData.append("media", img);
 
-      const res = await fetch("/api/posts/create", {
+      // Use apiFetch instead of fetch
+      const data = await apiFetch("/api/posts/create", {
         method: "POST",
         body: formData,
         credentials: "include",
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Something went wrong");
       return data;
     },
     onSuccess: () => {
