@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import FollowersFollowingSkeleton from "../../skeletons/FollowersFollowingSkeleton";
-import { apiFetch } from "../../utils/apiFetch";
+import { apiFetch } from "../../services/apiClient";
 // import FollowButton from "../../components/FollowButton"; // optional
 
 const FollowListPage = ({ type }) => {
