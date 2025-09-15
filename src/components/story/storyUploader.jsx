@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { FaPlus } from "react-icons/fa";
 import { toast } from "react-hot-toast";
+import { apiFetch } from "../services/apiClient"; // ✅ import apiFetch
 
 const StoryUploader = ({ authUser, onUploadSuccess }) => {
   const [media, setMedia] = useState(null);
@@ -17,17 +18,14 @@ const StoryUploader = ({ authUser, onUploadSuccess }) => {
 
     try {
       setIsUploading(true);
-      const res = await fetch("/api/stories", {
+      // ✅ use apiFetch instead of fetch
+      await apiFetch("/api/stories", {
         method: "POST",
         body: formData,
-        credentials: "include",
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Upload failed");
 
       toast.success("Story uploaded!");
       setMedia(null);
-      // Notify listeners to refresh and refetch locally
       window.dispatchEvent(new Event("stories:refresh"));
       onUploadSuccess && onUploadSuccess();
     } catch (err) {
@@ -40,7 +38,6 @@ const StoryUploader = ({ authUser, onUploadSuccess }) => {
   const handleSelect = (file) => {
     setMedia(file);
     if (file) {
-      // Auto-start upload on selection
       setTimeout(() => {
         handleUpload();
       }, 0);
@@ -49,7 +46,6 @@ const StoryUploader = ({ authUser, onUploadSuccess }) => {
 
   return (
     <div className="relative w-20 h-20 rounded-full overflow-hidden cursor-pointer flex items-center justify-center">
-      {/* Loading ring overlay */}
       {isUploading && (
         <div className="absolute inset-0 rounded-full border-4 border-pink-500/40 border-t-transparent animate-spin z-10" />
       )}
