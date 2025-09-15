@@ -1,6 +1,9 @@
 // src/pages/followersfollowing/FollowersPage.jsx
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
+import FollowersFollowingSkeleton from "../../skeletons/FollowersFollowingSkeleton";
+// import FollowButton from "../../components/FollowButton"; // optional
 
 const FollowersPage = () => {
   const { username } = useParams();
@@ -10,12 +13,15 @@ const FollowersPage = () => {
 
   useEffect(() => {
     const fetchFollowers = async () => {
+      setLoading(true);
       try {
         const res = await fetch(`/api/users/${username}/followers`);
         const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "Failed to fetch followers");
         setFollowers(data);
       } catch (error) {
         console.error("Error fetching followers:", error);
+        toast.error(error.message || "Something went wrong");
       } finally {
         setLoading(false);
       }
@@ -23,7 +29,7 @@ const FollowersPage = () => {
     fetchFollowers();
   }, [username]);
 
-  if (loading) return <p className="p-4 text-center text-gray-500">Loading followers...</p>;
+  if (loading) return <FollowersFollowingSkeleton />;
 
   return (
     <div className="max-w-2xl mx-auto mt-6">
@@ -55,7 +61,7 @@ const FollowersPage = () => {
                 </div>
               </div>
               {/* Optional follow/unfollow button */}
-              {/* <button className="btn btn-outline btn-sm">Follow</button> */}
+              {/* <FollowButton userId={user._id} /> */}
             </li>
           ))}
         </ul>
