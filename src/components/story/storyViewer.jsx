@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback } from "react";
 import { toast } from "react-hot-toast";
+import { apiFetch } from "../services/apiClient"; // ✅ import apiFetch
 
 const StoryViewer = ({ userId, authUser, onClose }) => {
   const [stories, setStories] = useState([]);
@@ -9,14 +10,10 @@ const StoryViewer = ({ userId, authUser, onClose }) => {
   const fetchUserStories = useCallback(async () => {
     try {
       setIsLoading(true);
-      const res = await fetch(`/api/stories/user/${userId}`, {
-        credentials: "include",
-      });
-      const data = await res.json();
-      const list = Array.isArray(data) ? data : [];
-      setStories(list);
+      const data = await apiFetch(`/api/stories/user/${userId}`);
+      setStories(Array.isArray(data) ? data : []);
       setActiveIndex(0);
-      if (list.length === 0) {
+      if (!data || data.length === 0) {
         toast("No stories to show", { icon: "ℹ️" });
         onClose && onClose();
       }
@@ -37,12 +34,8 @@ const StoryViewer = ({ userId, authUser, onClose }) => {
   useEffect(() => {
     if (!stories.length) return;
     const timer = setTimeout(() => {
-      setActiveIndex((prev) => {
-        const next = prev + 1;
-        if (next >= stories.length) return prev; // stop at last; don't auto-close
-        return next;
-      });
-    }, 5000); // 5s per story
+      setActiveIndex((prev) => Math.min(prev + 1, stories.length - 1));
+    }, 5000);
     return () => clearTimeout(timer);
   }, [stories, activeIndex]);
 
@@ -71,9 +64,9 @@ const StoryViewer = ({ userId, authUser, onClose }) => {
   const story = stories[activeIndex];
   const isVideo = story.type === "video";
 
-
   return (
     <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center" onClick={onClose}>
+      {/* Close button */}
       <button
         type="button"
         className="absolute top-4 right-4 text-white text-xl z-50 hover:scale-105 transition"
@@ -83,22 +76,16 @@ const StoryViewer = ({ userId, authUser, onClose }) => {
         ✕
       </button>
 
+      {/* Prev button */}
       <div
         className="absolute top-12 bottom-0 left-0 w-1/5 flex items-center justify-start z-20"
-        onClick={(e) => {
-          e.stopPropagation();
-          goPrev();
-        }}
+        onClick={(e) => { e.stopPropagation(); goPrev(); }}
         role="button"
         tabIndex={0}
         onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); goPrev(); } }}
       >
         <button
           type="button"
-          onClick={(e) => {
-            e.stopPropagation();
-            goPrev();
-          }}
           className="ml-4 text-white/80 text-3xl disabled:opacity-30 z-20"
           disabled={activeIndex === 0}
           aria-label="Previous story"
@@ -107,6 +94,7 @@ const StoryViewer = ({ userId, authUser, onClose }) => {
         </button>
       </div>
 
+      {/* Story media */}
       <div className="w-full max-w-md aspect-[9/16] bg-black flex items-center justify-center z-10" onClick={(e) => e.stopPropagation()}>
         {isVideo ? (
           <video src={story.mediaUrl} controls autoPlay className="w-full h-full object-contain" />
@@ -115,22 +103,16 @@ const StoryViewer = ({ userId, authUser, onClose }) => {
         )}
       </div>
 
+      {/* Next button */}
       <div
         className="absolute top-12 bottom-0 right-0 w-1/5 flex items-center justify-end z-20"
-        onClick={(e) => {
-          e.stopPropagation();
-          goNext();
-        }}
+        onClick={(e) => { e.stopPropagation(); goNext(); }}
         role="button"
         tabIndex={0}
         onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); goNext(); } }}
       >
         <button
           type="button"
-          onClick={(e) => {
-            e.stopPropagation();
-            goNext();
-          }}
           className="mr-4 text-white/80 text-3xl disabled:opacity-30 z-20"
           disabled={activeIndex === stories.length - 1}
           aria-label="Next story"
@@ -145,30 +127,24 @@ const StoryViewer = ({ userId, authUser, onClose }) => {
         </div>
       )}
 
-      {/* View count removed per request */}
-
-      {authUser?._id && story?.user && String(authUser._id) === String(story.user._id) && (
+      {/* Delete button for own stories */}
+      {authUser?._id && String(authUser._id) === String(story.user._id) && (
         <button
           onClick={async () => {
             try {
-              const res = await fetch(`/api/stories/${story._id}`, {
-                method: "DELETE",
-                credentials: "include",
-              });
-              const data = await res.json();
-              if (!res.ok) throw new Error(data.error || "Failed to delete story");
+              await apiFetch(`/api/stories/${story._id}`, { method: "DELETE" });
               toast.success("Story deleted");
-              // remove from local list and notify home to refresh
+
               setStories((prev) => {
                 const next = prev.filter((s) => s._id !== story._id);
-                if (next.length === 0) {
+                if (!next.length) {
                   onClose && onClose();
-                  return next;
+                  return [];
                 }
                 setActiveIndex((idx) => Math.min(idx, next.length - 1));
                 return next;
               });
-              // trigger home StoryBar to refresh feed without full page reload
+
               window.dispatchEvent(new Event("stories:refresh"));
             } catch (err) {
               toast.error(err.message);
@@ -176,7 +152,6 @@ const StoryViewer = ({ userId, authUser, onClose }) => {
           }}
           className="absolute top-4 left-4 text-white text-sm bg-red-600/90 hover:bg-red-600 px-3 py-1 rounded-full shadow-lg flex items-center gap-2"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4"><path fillRule="evenodd" d="M9 3.75A2.25 2.25 0 0111.25 1.5h1.5A2.25 2.25 0 0115 3.75V6h4.5a.75.75 0 010 1.5h-.708l-1.18 12.025A2.25 2.25 0 0115.37 21.75H8.63a2.25 2.25 0 01-2.243-2.225L5.206 7.5H4.5a.75.75 0 010-1.5H9V3.75zm1.5 0A.75.75 0 0011.25 3h1.5a.75.75 0 00.75.75V6h-3V3.75zM8.03 7.5l1.06 12h5.82l1.06-12H8.03z" clipRule="evenodd" /></svg>
           Delete
         </button>
       )}
