@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import FollowersFollowingSkeleton from "../../skeletons/FollowersFollowingSkeleton";
+import { apiFetch } from "../../utils/apiFetch";
 // import FollowButton from "../../components/FollowButton"; // optional
 
 const FollowersPage = () => {
@@ -15,18 +16,17 @@ const FollowersPage = () => {
     const fetchFollowers = async () => {
       setLoading(true);
       try {
-        const res = await fetch(`/api/users/${username}/followers`);
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || "Failed to fetch followers");
+        const data = await apiFetch(`/api/users/${username}/followers`);
         setFollowers(data);
       } catch (error) {
         console.error("Error fetching followers:", error);
-        toast.error(error.message || "Something went wrong");
+        toast.error(error.message || "Failed to fetch followers");
       } finally {
         setLoading(false);
       }
     };
-    fetchFollowers();
+
+    if (username) fetchFollowers();
   }, [username]);
 
   if (loading) return <FollowersFollowingSkeleton />;
