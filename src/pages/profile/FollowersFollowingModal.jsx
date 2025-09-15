@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import FollowersFollowingSkeleton from "../../components/skeletons/FollowersFollowingSkeleton";
-import { apiFetch } from "../../utils/apiFetch"; // Make sure you have this
+import { apiFetch } from "../../services/apiClient"; // Make sure you have this
 
 const FollowersFollowingModal = ({ username, type, closeModal }) => {
   const fetchList = async () => {
