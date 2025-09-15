@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-hot-toast";
 
 import LoadingSpinner from "../../components/common/LoadingSpinner";
-import { apiFetch } from "../../utils/apiFetch"; // make sure this exists
+import { apiFetch } from "../../services/apiClient"; // make sure this exists
 
 import { IoSettingsOutline } from "react-icons/io5";
 import { FaUser } from "react-icons/fa";
