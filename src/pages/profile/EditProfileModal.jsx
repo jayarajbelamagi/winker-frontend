@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { toast } from "react-hot-toast";
-import { apiFetch } from "../../utils/apiFetch"; // make sure this exists
+import { apiFetch } from "../../services/apiClient"; // make sure this exists
 
 const EditProfileModal = ({ authUser }) => {
   const [formData, setFormData] = useState({
