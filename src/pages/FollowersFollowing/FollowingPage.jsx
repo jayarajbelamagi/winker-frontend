@@ -3,6 +3,8 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import FollowersFollowingSkeleton from "../../skeletons/FollowersFollowingSkeleton";
+import { apiFetch } from "../../utils/apiFetch";
+// import FollowButton from "../../components/FollowButton"; // optional
 
 const FollowListPage = ({ type }) => {
   const { username } = useParams();
@@ -14,9 +16,7 @@ const FollowListPage = ({ type }) => {
     const fetchUsers = async () => {
       setLoading(true);
       try {
-        const res = await fetch(`/api/users/${username}/${type}`);
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || `Failed to fetch ${type}`);
+        const data = await apiFetch(`/api/users/${username}/${type}`);
         setUsers(data);
       } catch (error) {
         console.error(`Error fetching ${type}:`, error);
@@ -25,14 +25,17 @@ const FollowListPage = ({ type }) => {
         setLoading(false);
       }
     };
-    fetchUsers();
+
+    if (username) fetchUsers();
   }, [username, type]);
 
   if (loading) return <FollowersFollowingSkeleton />;
 
   return (
     <div className="max-w-2xl mx-auto mt-6">
-      <h2 className="text-2xl font-bold mb-4 px-4">{type === "followers" ? "Followers" : "Following"}</h2>
+      <h2 className="text-2xl font-bold mb-4 px-4">
+        {type === "followers" ? "Followers" : "Following"}
+      </h2>
       {users.length === 0 ? (
         <p className="px-4 text-gray-500">No {type} found.</p>
       ) : (
