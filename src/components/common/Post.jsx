@@ -5,7 +5,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-hot-toast";
-
+import { apiFetch } from "../services/apiClient";
 import LoadingSpinner from "./LoadingSpinner";
 import { formatPostDate } from "../../utils/date";
 
@@ -25,7 +25,7 @@ const Post = ({ post }) => {
   // 🗑️ Delete Post
   const { mutate: deletePost, isPending: isDeleting } = useMutation({
     mutationFn: async () => {
-      const res = await fetch(`/api/posts/${post._id}`, { method: "DELETE" });
+      const res = await apiFetch(`/api/posts/${post._id}`, { method: "DELETE" });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Something went wrong");
       return data;
@@ -39,7 +39,7 @@ const Post = ({ post }) => {
   // ❤️ Like Post (with optimistic update)
   const { mutate: likePost, isPending: isLiking } = useMutation({
     mutationFn: async () => {
-      const res = await fetch(`/api/posts/like/${post._id}`, { method: "POST" });
+      const res = await apiFetch(`/api/posts/like/${post._id}`, { method: "POST" });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Something went wrong");
       return data; // this should return updated likes array from backend
@@ -81,7 +81,7 @@ const Post = ({ post }) => {
   // 💬 Comment on Post
   const { mutate: commentPost, isPending: isCommenting } = useMutation({
     mutationFn: async () => {
-      const res = await fetch(`/api/posts/comment/${post._id}`, {
+      const res = await apiFetch(`/api/posts/comment/${post._id}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ text: comment }),
